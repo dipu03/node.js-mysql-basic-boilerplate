@@ -6,7 +6,7 @@ const passport = require('passport');
 const httpStatus = require('http-status');
 
 const config = require('./src/config/config.js');
-const routes = require('./src/routes/v1');
+const routes = require('./src/routes/v1');   // UnComment after adding Routes
 const morgan = require('./src/config/morgan.js');
 const { authLimiter } = require('./src/middlewares/rateLimiter.js');
 
@@ -15,71 +15,6 @@ const ApiError = require('./src/utils/apiError.js');
 const path = require("path");
 const app = express();
 const multer = require('multer');
-
-
-app.get('/', (req, res) => {
-  res.status(200).send("Hello World !!")
-});
-
-
-
-const PUBLIC_DIR = path.resolve(__dirname, "./public");
-
-//Configuration for Multer for pdf
-const pdfStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, PUBLIC_DIR + '/uploads/pdf')
-  },
-  filename: (req, file, cb) => {
-    const ext = file.mimetype.split("/")[1];
-    cb(null, `files/admin-${file.fieldname}-${Date.now()}.${ext}`);
-  },
-});
-
-// Multer Filter
-const multerFilterPdf = (req, file, cb) => {
-  if (file.mimetype.split("/")[1] === "pdf") {
-    cb(null, true);
-  } else {
-    cb(new Error("Not a PDF File!!"), false);
-  }
-};
-
-
-//Configuration for Multer for video
-const Videostorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, PUBLIC_DIR + '/uploads/video')
-  },
-  filename: function (req, file, cb) {
-    cb(null, `files/admin-${file.fieldname}-${Date.now()}.${ext}`);
-  }
-});
-
-
-//Configuration for Multer for image
-const imageStorage = multer.diskStorage({ //multers disk storage settings
-  destination: function (req, file, cb) {
-    cb(null, './public/uploads/')
-  },
-  filename: function (req, file, cb) {
-    cb(null, `files/admin-${file.fieldname}-${Date.now()}.${ext}`)
-  }
-});
-
-const multerFilterImage = function (req, file, callback) {
-  var ext = path.extname(file.originalname);
-  if (ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg') {
-    return callback(new Error('Only images are allowed'))
-  }
-  callback(null, true)
-};
-
-
-const videoUpload = multer({ storage: Videostorage });
-const imageUpload = multer({ storage: imageStorage, fileFilter: multerFilterImage, limits: { fileSize: 1024 * 1024 } });
-const pdfUpload = multer({ storage: pdfStorage, fileFilter: multerFilterPdf });
-
 
 
 if (config.env !== 'test') {
@@ -102,10 +37,70 @@ app.use(compression());
 
 
 
+const PUBLIC_DIR = path.resolve(__dirname, "./public");
+
+//Configuration for Multer for pdf
+const pdfStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, PUBLIC_DIR + 'public/uploads')
+  },
+  filename: (req, file, cb) => {
+    const ext = file.mimetype.split("/")[1];
+    cb(null, `pdf/admin-${file.fieldname}-${Date.now()}.${ext}`);
+  },
+});
+
+// Multer Filter
+const multerFilterPdf = (req, file, cb) => {
+  if (file.mimetype.split("/")[1] === "pdf") {
+    cb(null, true);
+  } else {
+    cb(new Error("Not a PDF File!!"), false);
+  }
+};
+
+
+//Configuration for Multer for video
+const Videostorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, PUBLIC_DIR + 'public/uploads')
+  },
+  filename: function (req, file, cb) {
+    const ext = file.mimetype.split("/")[1];
+    cb(null, `video/admin-${file.fieldname}-${Date.now()}.${ext}`);
+  }
+});
+
+
+//Configuration for Multer for image
+const imageStorage = multer.diskStorage({ //multers disk storage settings
+  destination: function (req, file, cb) {
+    cb(null, './public/uploads')
+  },
+  filename: function (req, file, cb) {
+    const ext = file.mimetype.split("/")[1];
+    cb(null, `image/admin-${file.fieldname}-${Date.now()}.${ext}`)
+  }
+});
+
+const multerFilterImage = function (req, file, callback) {
+  var ext = path.extname(file.originalname);
+  if (ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg') {
+    return callback(new Error('Only images are allowed'));
+  }
+  callback(null, true)
+};
+
+
+const videoUpload = multer({ storage: Videostorage });
+const imageUpload = multer({ storage: imageStorage, fileFilter: multerFilterImage, limits: { fileSize: 1024 * 1024 } });
+const pdfUpload = multer({ storage: pdfStorage, fileFilter: multerFilterPdf });
+
+
 // // v1 api routes
-// app.use('/api/v1', videoUpload.single('myVideo'), routes);
-// app.use('/api/v1', imageUpload.single('myImage'), routes);
-// app.use('/api/v1', pdfUpload.single('myPdf'), routes);
+// app.use('/api/v1/video', videoUpload.single('myVideo'), routes);
+app.use('/api/v1', imageUpload.single('myImage'), routes);
+// app.use('/api/v1/pdf', pdfUpload.single('myPdf'), routes);
 
 app.get('/api/healthcheck', function (req, res) {
   let data = {
