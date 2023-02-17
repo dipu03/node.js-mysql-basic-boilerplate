@@ -1,8 +1,7 @@
 
-
 const getHomePage = async (req, res) => {
-    console.log("11111111111111111111", req.file, req.body);
-    res.status(200).send("hello World!!");
+    // console.log("Inside Home Page Upload", req.body.text, req.files); //Coming From Multer Middleware
+    res.status(200).send('Hello World !!');
 };
 
 
